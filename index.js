@@ -37,8 +37,8 @@ const cellPositionToRange = (tableInfo) =>
 
 const searchPointInTable = (tableInfo) =>
     (point) => {
-        const cellAndBorderWidth = tableInfo.cellWidth + tableInfo.borderWidth;
-        const cellAndBorderHeight = tableInfo.cellHeight + tableInfo.borderWidth;
+        const cellAndBorderWidth = tableInfo.cellWidth + tableInfo.borderWidth * 2;
+        const cellAndBorderHeight = tableInfo.cellHeight + tableInfo.borderWidth * 2;
 
         const cellPositionX = Math.floor(point.x / cellAndBorderWidth);
         const cellPositionY = Math.floor(point.y / cellAndBorderHeight);
@@ -89,6 +89,20 @@ const prepareDrawTable = (tableInfo) =>
                 }
             }
 
+const prepareTouchCell = (tableInfo) =>
+    (cellPosition) =>
+        (context) =>
+            () => {
+                const cellRange = cellPositionToRange(tableInfo)(cellPosition);
+                context.fillStyle = tableInfo.touchedCellColor;
+                context.fillRect(
+                    cellRange.startPoint.x + 1,
+                    cellRange.startPoint.y + 1,
+                    cellRange.width - 1,
+                    cellRange.height - 1
+                );
+            }
+
 const prepareClearCanvas = (canvasInfo) =>
     (context) =>
         () => {
@@ -104,6 +118,19 @@ const tableInfo = Object.freeze({
     touchedCellColor: "#FF0000",
 });
 
+const getCanvasCoordinates = (touch) =>
+    (canvas) => {
+        const rect = canvas.getBoundingClientRect(); // canvas在视口中的位置和大小
+        const scaleX = canvas.width / rect.width;    // 宽度缩放因子
+        const scaleY = canvas.height / rect.height;  // 高度缩放因子
+
+        return {
+            x: (touch.clientX - rect.left) * scaleX,
+            y: (touch.clientY - rect.top) * scaleY
+        };
+    };
+
+
 const canvasInit = () => {
     const contentCanvas = document.getElementById("content");
     const context = contentCanvas.getContext("2d");
@@ -112,10 +139,24 @@ const canvasInit = () => {
         contentCanvas.clientHeight
     );
 
-    context.imageSmoothingEnabled = false
+    const handleTouchMove = (event) => {
+        event.preventDefault();
+
+        const touch = event.touches[0];
+        const coordinates = getCanvasCoordinates(touch)(contentCanvas);
+        const point = new Point(coordinates.x, coordinates.y);
+        const cellPosition = searchPointInTable(tableInfo)(point);
+
+        prepareTouchCell(tableInfo)(cellPosition)(context)();
+    }
+    contentCanvas.addEventListener("touchmove", handleTouchMove);
+
     prepareDrawTable(tableInfo)(canvasInfo)(context)();
 
-    return prepareClearCanvas(canvasInfo)(context);
+    return () => {
+        contentCanvas.removeEventListener("touchmove", handleTouchMove);
+        prepareClearCanvas(canvasInfo)(context)();
+    }
 }
 
 let canvasReset = canvasInit()
