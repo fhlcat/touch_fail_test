@@ -147,6 +147,7 @@ contentCanvas.addEventListener("touchmove", handleTouchMove);
 let touchendCount = -1;
 const showTouchFailCount = () => {
     window.alert(`喜报：断触了 ${touchendCount} 次`);
+    window.location.reload()
 }
 let timeoutNumber;
 contentCanvas.addEventListener("touchstart", () => {
