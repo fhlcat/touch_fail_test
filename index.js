@@ -103,12 +103,6 @@ const prepareTouchCell = (tableInfo) =>
                 );
             }
 
-const prepareClearCanvas = (canvasInfo) =>
-    (context) =>
-        () => {
-            context.clearRect(0, 0, canvasInfo.width, canvasInfo.height);
-        }
-
 const tableInfo = Object.freeze({
     borderWidth: 1,
     borderColor: "#000000",
@@ -131,36 +125,36 @@ const getCanvasCoordinates = (touch) =>
     };
 
 
-const canvasInit = () => {
-    const contentCanvas = document.getElementById("content");
-    const context = contentCanvas.getContext("2d");
-    const canvasInfo = new CanvasInfo(
-        contentCanvas.clientWidth,
-        contentCanvas.clientHeight
-    );
+const contentCanvas = document.getElementById("content");
+const context = contentCanvas.getContext("2d");
+const canvasInfo = new CanvasInfo(
+    contentCanvas.clientWidth,
+    contentCanvas.clientHeight
+);
 
-    const handleTouchMove = (event) => {
-        event.preventDefault();
+const handleTouchMove = (event) => {
+    event.preventDefault();
 
-        const touch = event.touches[0];
-        const coordinates = getCanvasCoordinates(touch)(contentCanvas);
-        const point = new Point(coordinates.x, coordinates.y);
-        const cellPosition = searchPointInTable(tableInfo)(point);
+    const touch = event.touches[0];
+    const coordinates = getCanvasCoordinates(touch)(contentCanvas);
+    const point = new Point(coordinates.x, coordinates.y);
+    const cellPosition = searchPointInTable(tableInfo)(point);
 
-        prepareTouchCell(tableInfo)(cellPosition)(context)();
-    }
-    contentCanvas.addEventListener("touchmove", handleTouchMove);
-
-    prepareDrawTable(tableInfo)(canvasInfo)(context)();
-
-    return () => {
-        contentCanvas.removeEventListener("touchmove", handleTouchMove);
-        prepareClearCanvas(canvasInfo)(context)();
-    }
+    prepareTouchCell(tableInfo)(cellPosition)(context)();
 }
+contentCanvas.addEventListener("touchmove", handleTouchMove);
 
-let canvasReset = canvasInit()
-window.addEventListener("resize", () => {
-    canvasReset()
-    canvasReset = canvasInit()
+let touchendCount = -1;
+const showTouchFailCount = () => {
+    window.alert(`喜报：断触了 ${touchendCount} 次`);
+}
+let timeoutNumber;
+contentCanvas.addEventListener("touchstart", () => {
+    clearTimeout(timeoutNumber)
 })
+contentCanvas.addEventListener("touchend", () => {
+    touchendCount++;
+    timeoutNumber = setTimeout(showTouchFailCount, 1000);
+})
+
+prepareDrawTable(tableInfo)(canvasInfo)(context)();
