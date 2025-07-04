@@ -1,4 +1,5 @@
-import {CanvasInfo, Point, prepareDrawTable, prepareTouchCell, searchPointInTable, tableInfo} from "./utils.js";
+import {CanvasInfo, Point, prepareDrawTable, prepareTouchCell, searchPointInTable} from "./utils.js";
+import {tableInfo} from "./tableInfo";
 
 const contentCanvas = document.getElementById("content")
 contentCanvas.width = window.innerWidth;

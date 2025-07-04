@@ -100,11 +100,3 @@ export const prepareTouchCell = (tableInfo) =>
                 );
             }
 
-export const tableInfo = Object.freeze({
-    borderWidth: 1,
-    borderColor: "#000000",
-    cellHeight: 75,
-    cellWidth: 75,
-    untouchedCellColor: "#FFFFFF",
-    touchedCellColor: "#FF0000",
-});
