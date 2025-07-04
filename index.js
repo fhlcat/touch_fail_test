@@ -106,26 +106,15 @@ const prepareTouchCell = (tableInfo) =>
 const tableInfo = Object.freeze({
     borderWidth: 1,
     borderColor: "#000000",
-    cellHeight: 20,
-    cellWidth: 20,
+    cellHeight: 75,
+    cellWidth: 75,
     untouchedCellColor: "#FFFFFF",
     touchedCellColor: "#FF0000",
 });
 
-const getCanvasCoordinates = (touch) =>
-    (canvas) => {
-        const rect = canvas.getBoundingClientRect(); // canvas在视口中的位置和大小
-        const scaleX = canvas.width / rect.width;    // 宽度缩放因子
-        const scaleY = canvas.height / rect.height;  // 高度缩放因子
-
-        return {
-            x: (touch.clientX - rect.left) * scaleX,
-            y: (touch.clientY - rect.top) * scaleY
-        };
-    };
-
-
-const contentCanvas = document.getElementById("content");
+const contentCanvas = document.getElementById("content")
+contentCanvas.width = window.innerWidth;
+contentCanvas.height = window.innerHeight;
 const context = contentCanvas.getContext("2d");
 const canvasInfo = new CanvasInfo(
     contentCanvas.clientWidth,
@@ -136,8 +125,7 @@ const handleTouchMove = (event) => {
     event.preventDefault();
 
     const touch = event.touches[0];
-    const coordinates = getCanvasCoordinates(touch)(contentCanvas);
-    const point = new Point(coordinates.x, coordinates.y);
+    const point = new Point(touch.clientX, touch.clientY);
     const cellPosition = searchPointInTable(tableInfo)(point);
 
     prepareTouchCell(tableInfo)(cellPosition)(context)();
